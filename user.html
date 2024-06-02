@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classification</title>
+</head>
+<body>
+    <h1>Image Classification</h1>
+    <form id="upload-form" enctype="multipart/form-data" onsubmit="return predictImage()">
+        <input type="file" id="image-input" accept="image/*" required>
+        <button type="submit">Predict</button>
+    </form>
+    <div id="result">
+        <h2>Prediction Result:</h2>
+        <h2 id="predicted-label">Predicted class: </h2>
+        <img id="uploaded-image" style="max-width: 100%;" src="#" alt="Uploaded Image">
+    </div>
+    <script>
+        function predictImage() {
+            // Mendapatkan file gambar dari input
+            var imgInput = document.getElementById('image-input');
+            var imgFile = imgInput.files[0];
+
+            if (!imgFile) {
+                console.error('No image file selected');
+                return false;
+            }
+
+            var formData = new FormData();
+            formData.append('image', imgFile);
+
+            // Menampilkan gambar yang di-submit
+            var uploadedImage = document.getElementById('uploaded-image');
+            uploadedImage.src = URL.createObjectURL(imgFile);
+
+            fetch('http:/172.16.165.229:5000/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error:', data.error);
+                } else {
+                    var predictedLabel = 'Predicted class: ' + data.prediction;
+                    document.getElementById('predicted-label').innerText = predictedLabel;
+                    console.log(predictedLabel); // Mencetak ke konsol log
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+            return false; // Menghentikan pengiriman formulir tradisional
+        }
+    </script>
+</body>
+</html>
